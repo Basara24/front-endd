@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import "./Register.css";
+import { apiClient, getApiErrorMessage } from "../api/client";
+import { getPasswordStrength, onlyDigits, validateCPF, validateEmail } from "../utils/validation";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -18,20 +19,15 @@ export default function Register() {
   const [erro, setErro] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === "cpf") {
+      setFormData({ ...formData, cpf: onlyDigits(value) });
+      return;
+    }
+    setFormData({ ...formData, [name]: value });
   };
 
-  const validarEmail = (email: string) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
-
-  const validarCPF = (cpf: string) => {
-    const regex = /^\d{11}$/;
-    return regex.test(cpf);
-  };
-
-  const senhaForte = (senha: string) => senha.length >= 6;
+  const senhaForte = (senha: string) => getPasswordStrength(senha) !== "fraca";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,15 +39,17 @@ export default function Register() {
       return setErro("Preencha todos os campos.");
     }
 
-    if (!validarEmail(email)) return setErro("E-mail inválido.");
-    if (!validarCPF(cpf)) return setErro("CPF inválido. Use apenas números.");
+    if (!validateEmail(email)) return setErro("E-mail inválido.");
+    if (!validateCPF(cpf)) return setErro("CPF inválido.");
     if (!senhaForte(password))
-      return setErro("A senha deve ter pelo menos 6 caracteres.");
+      return setErro(
+        "Senha fraca. Use pelo menos 8 caracteres, com letras maiúsculas/minúsculas e números."
+      );
     if (password !== confirmPassword)
       return setErro("As senhas não coincidem.");
 
     try {
-      await axios.post("http://localhost:3000/users", {
+      await apiClient.post("/users", {
         name,
         email,
         cpf,
@@ -60,11 +58,7 @@ export default function Register() {
 
       navigate("/login");
     } catch (err: any) {
-      if (axios.isAxiosError(err)) {
-        setErro(err.response?.data?.error || "Erro ao criar conta.");
-      } else {
-        setErro("Erro inesperado.");
-      }
+      setErro(getApiErrorMessage(err, "Erro ao criar conta."));
     }
   };
 

@@ -1,5 +1,1 @@
-import axios from "axios";
-
-export const api = axios.create({
-  baseURL: "http://localhost:3000", // Ajuste conforme seu backend
-});
+export { apiClient as api } from "./client";

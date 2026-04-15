@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import "./CreateEvent.css";
+import { apiClient, getApiErrorMessage } from "../api/client";
+import { PageShell } from "../components/PageShell";
 
 export default function CreateEvent() {
   const navigate = useNavigate();
@@ -41,9 +42,6 @@ export default function CreateEvent() {
     e.preventDefault();
     setErro("");
 
-    const token = localStorage.getItem("token");
-    if (!token) return setErro("Usuário não autenticado.");
-
     try {
       const formData = new FormData();
       formData.append("name", form.name);
@@ -55,28 +53,22 @@ export default function CreateEvent() {
         formData.append("image", form.image);
       }
 
-      const response = await axios.post(
-        "http://localhost:3000/events",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await apiClient.post("/events", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       console.log("Evento criado:", response.data);
       navigate("/home");
     } catch (err: any) {
       console.error(err);
-      setErro("Erro ao criar evento.");
+      setErro(getApiErrorMessage(err, "Erro ao criar evento."));
     }
   };
 
   return (
-    <div className="create-event-container">
-      <form className="create-event-form" onSubmit={handleSubmit}>
+    <PageShell title="Criar evento" showHome showBack>
+      <div className="create-event-container" style={{ minHeight: "auto", padding: 0, background: "transparent" }}>
+        <form className="create-event-form" onSubmit={handleSubmit}>
         <h1 className="create-event-title">Criar Evento</h1>
         <p className="create-event-subtitle">
           Preencha os detalhes do seu evento abaixo
@@ -172,6 +164,7 @@ export default function CreateEvent() {
           Criar Evento
         </button>
       </form>
-    </div>
+      </div>
+    </PageShell>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import "./EventDetails.css";
+import { apiClient, getApiErrorMessage } from "../api/client";
 
 interface Event {
   id: number;
@@ -10,6 +10,7 @@ interface Event {
   date: string;
   location: string;
   image_url: string | null;
+  organizer_id?: number;
   organizer?: {
     id: number;
     name: string;
@@ -30,12 +31,14 @@ export default function EventDetails() {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/events/${id}`);
+        const response = await apiClient.get(`/events/${id}`);
         setEvent(response.data);
       } catch (err) {
-        console.error("Erro ao carregar evento:", err);
         setError(
-          "Erro ao carregar detalhes do evento. Por favor, tente novamente mais tarde."
+          getApiErrorMessage(
+            err,
+            "Erro ao carregar detalhes do evento. Por favor, tente novamente mais tarde."
+          )
         );
       } finally {
         setLoading(false);
@@ -52,31 +55,11 @@ export default function EventDetails() {
       setParticipating(true);
       setRegistrationError("");
 
-      // Obter o token do localStorage
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setRegistrationError(
-          "Você precisa estar logado para participar do evento."
-        );
-        return;
-      }
-
-      // Fazer a chamada para a API de registro
-      await axios.post(
-        `http://localhost:3000/events/${id}/register`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await apiClient.post(`/events/${id}/register`, {});
 
       alert("Inscrição realizada com sucesso!");
       // Atualizar o estado do evento para refletir a nova inscrição
-      const updatedEvent = await axios.get(
-        `http://localhost:3000/events/${id}`
-      );
+      const updatedEvent = await apiClient.get(`/events/${id}`);
       setEvent(updatedEvent.data);
     } catch (err: any) {
       console.error("Erro ao participar do evento:", err);
@@ -88,7 +71,7 @@ export default function EventDetails() {
         setRegistrationError("Você já está inscrito neste evento.");
       } else {
         setRegistrationError(
-          "Erro ao participar do evento. Por favor, tente novamente."
+          getApiErrorMessage(err, "Erro ao participar do evento. Por favor, tente novamente.")
         );
       }
     } finally {
@@ -267,6 +250,27 @@ export default function EventDetails() {
               className="event-details-button event-details-button-secondary"
             >
               Voltar
+            </button>
+            <button
+              onClick={() => navigate(`/evento/${event.id}/edit`)}
+              className="event-details-button event-details-button-secondary"
+            >
+              Editar
+            </button>
+            <button
+              onClick={async () => {
+                if (!confirm("Tem certeza que deseja excluir este evento?")) return;
+                try {
+                  await apiClient.delete(`/events/${event.id}`);
+                  alert("Evento excluído.");
+                  navigate("/home");
+                } catch (err) {
+                  alert(getApiErrorMessage(err, "Erro ao excluir evento."));
+                }
+              }}
+              className="event-details-button event-details-button-secondary"
+            >
+              Excluir
             </button>
             <button
               onClick={handleParticipate}

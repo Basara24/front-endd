@@ -1,7 +1,7 @@
 .home-container {
   margin-top: 4rem;
   min-height: calc(100vh - 4rem);
-  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  background: transparent;
   padding: 2rem 1rem;
 }
 
@@ -20,6 +20,14 @@
 .home-content {
   max-width: 80rem;
   margin: 0 auto;
+}
+
+.home-panel {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.18);
+  padding: 22px 18px;
 }
 
 .home-header {
@@ -67,6 +75,8 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   transform: translateY(0);
+  height: 44px;
+  font-weight: 800;
 }
 
 .create-event-button:hover {
@@ -185,14 +195,16 @@
 }
 
 .navbar {
-  background-color: #1a1a1a;
-  padding: 0.75rem 2rem;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 0.75rem 1rem;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(2, 6, 23, 0.25);
 }
 
 .navbar-content {
@@ -224,46 +236,66 @@
 .navigation-buttons {
   display: flex;
   gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .nav-button {
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.login-button {
-  background-color: #3b82f6;
-  color: white;
+.nav-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(2, 6, 23, 0.22);
+  background: rgba(255, 255, 255, 0.12);
 }
 
-.login-button:hover {
-  background-color: #2563eb;
-  transform: translateY(-2px);
+.nav-button-primary {
+  background: linear-gradient(to right, rgba(59, 130, 246, 0.9), rgba(37, 99, 235, 0.9));
+  border-color: rgba(59, 130, 246, 0.35);
+  color: #fff;
 }
 
-.register-button {
-  background-color: #8b5cf6;
-  color: white;
+.nav-button-danger {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #fff;
 }
 
-.register-button:hover {
-  background-color: #7c3aed;
-  transform: translateY(-2px);
+.nav-user-pill {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.35);
+  display: inline-flex;
+  align-items: center;
 }
 
-.subscription-button {
-  background-color: #ec4899;
-  color: white;
-}
-
-.subscription-button:hover {
-  background-color: #db2777;
-  transform: translateY(-2px);
+@media (max-width: 768px) {
+  .navbar-content {
+    gap: 10px;
+  }
+  .navigation-buttons {
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+  .logo-image {
+    height: 44px;
+  }
 }

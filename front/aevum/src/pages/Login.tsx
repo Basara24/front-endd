@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
+import { apiClient, getApiErrorMessage } from "../api/client";
+import { validateEmail } from "../utils/validation";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     senha: "",
@@ -26,26 +29,22 @@ export default function Login() {
       return setErro("Preencha todos os campos.");
     }
 
+    if (!validateEmail(email)) {
+      return setErro("E-mail inválido.");
+    }
+
     try {
-      const response = await axios.post("http://localhost:3000/users/login", {
+      const response = await apiClient.post("/users/login", {
         email,
         password: senha,
       });
 
       const { token } = response.data;
-      const payload = JSON.parse(atob(token.split(".")[1]));
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("userType", payload.type);
-      localStorage.setItem("userId", response.data.id);
+      await login(token);
 
       navigate("/home");
     } catch (err: any) {
-      if (axios.isAxiosError(err)) {
-        setErro(err.response?.data?.error || "Erro ao fazer login.");
-      } else {
-        setErro("Erro inesperado.");
-      }
+      setErro(getApiErrorMessage(err, "Erro ao fazer login."));
     }
   };
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import axios from "axios";
 import "./SignaturePage.css";
+import { apiClient, getApiErrorMessage } from "../api/client";
+import { PageShell } from "../components/PageShell";
 
 interface DecodedToken {
   id: number;
@@ -19,7 +20,6 @@ const SignaturePage: React.FC = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Você precisa estar logado para assinar.");
       navigate("/login");
       return;
     }
@@ -39,33 +39,27 @@ const SignaturePage: React.FC = () => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/signature`,
+      await apiClient.post(
+        `/signature`,
         { user_id: userId, plan },
-        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/users/${userId}/subscribe`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await apiClient.post(`/users/${userId}/subscribe`, {});
 
       alert("Assinatura realizada com sucesso! Você agora é um organizador.");
       navigate("/home");
     } catch (error) {
       console.error("Erro ao assinar:", error);
-      alert("Erro ao assinar. Tente novamente.");
+      alert(getApiErrorMessage(error, "Erro ao assinar. Tente novamente."));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="signature-container">
-      <div className="signature-card">
+    <PageShell title="Assinatura" showHome showBack>
+      <div className="signature-container" style={{ minHeight: "auto", padding: 0, background: "transparent" }}>
+        <div className="signature-card">
         <h1 className="signature-title">La Vamos Nós 🚀</h1>
         <p className="signature-subtitle">
           Assine um plano e torne-se <strong>organizador</strong> da plataforma.
@@ -116,7 +110,8 @@ const SignaturePage: React.FC = () => {
           </ul>
         </div>
       </div>
-    </div>
+      </div>
+    </PageShell>
   );
 };
 
